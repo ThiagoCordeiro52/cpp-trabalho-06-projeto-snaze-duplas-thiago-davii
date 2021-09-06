@@ -2,9 +2,13 @@
 
 Preencha os dados abaixo para identificar a autoria do trabalho.
 
-- Nome: *<insira seu nome aqui>*
-- Email: *<insira seu email aqui>*
-- Turma: *<insira sua turma aqui>*
+- Nome: *José Davi Viana Francelino*
+- Email: *jose.davi@imd.ufrn.br*
+- Turma: *DIM0120 - T01*
+
+- Nome: *Thiago de Oliveira Cordeiro*
+- Email: *thiagoty52@gmail.com*
+- Turma: *DIM0120 - T01*
 
 # Indique quais itens da avaliação foram realizados
 
