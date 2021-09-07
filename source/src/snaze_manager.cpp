@@ -70,9 +70,9 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
 
             std::string arg2 {argv[i]};
 
-            if (arg2 == "random") {
+            if (arg2 == "random" or arg2 == "r") {
                 // set player_type;
-            } else if (arg2 == "backtracking") {
+            } else if (arg2 == "backtracking" or arg2 == "b") {
                 // set player_type;
             } else {
                 error("invalid argument \"" + arg2 + "\" given to " + arg);
@@ -89,13 +89,29 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
         error("the path to the input file must be passed as argument");
 }
 
-void SnazeManager::update() {
+void SnazeManager::process() {
     switch (m_state) {
-        case GameState::START:
-            m_state = GameState::READING;
+        case START:
             break;
 
-        case GameState::READING:
+        case READING:
+            break;
+
+        case CREATING_LEVEL:
+            break;
+
+        default:
+            break;
+    }
+}
+
+void SnazeManager::update() {
+    switch (m_state) {
+        case START:
+            m_state = READING;
+            break;
+
+        case READING:
             break;
 
         default:
@@ -104,22 +120,9 @@ void SnazeManager::update() {
 }
 
 void SnazeManager::print_message() const {
-  std::cout << "--> Welcome to the classic Snake Game <---\n";
-  std::cout << "\t copyright IMD/UFRN 2020.\n";
-  std::cout << "---------------------------------------------------\n\n";
-}
-
-void SnazeManager::process() {
-    switch (m_state) {
-        case GameState::START:
-            break;
-
-        case GameState::READING:
-            break;
-
-        default:
-            break;
-    }
+    std::cout << "--> Welcome to the classic Snake Game <---\n";
+    std::cout << "\t copyright IMD/UFRN 2021.\n";
+    std::cout << "---------------------------------------------------\n\n";
 }
 
 void SnazeManager::render() const {

@@ -10,6 +10,8 @@ using std::vector;
 #include <string>
 using std::string;
 
+#include "level.h"
+
 /// This the main class that represents the Snaze manager.
 class SnazeManager {
     public:
@@ -47,5 +49,6 @@ class SnazeManager {
         number_type m_lives {5};
         std::string m_filename;
         // PlayerType player_type;
+        number_type m_curr_level;
 };
 #endif
