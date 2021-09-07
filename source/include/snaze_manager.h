@@ -19,13 +19,13 @@ class SnazeManager {
 
       // methods
       void initialize( int argc, char *argv[] );
-      bool quit_game(void){ return game_state == END; }
+      bool quit_game(void){ return m_state == END; }
       void process_events(void);
       void update(void);
       void render(void);
+      void print_message() const;
   
   private:
-      GameState game_state;
+      GameState m_state;
 };
-
 #endif
