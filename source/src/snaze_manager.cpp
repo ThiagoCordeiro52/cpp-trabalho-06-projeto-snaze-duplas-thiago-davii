@@ -5,7 +5,7 @@ std::string to_lowercase(const std::string& str) {
     auto clone = str;
     for (auto& c : clone) {
         c = ::tolower(c);
-    };
+    }
     return clone;
 }
 
@@ -30,8 +30,8 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
                 error("the argument of " + arg + " is out of range");
             }
 
-            // if (m_fps < 1 || m_fps > 15)
-            //     error("the argument of " + arg + " is out of range");
+            if (m_fps < 1 || m_fps > 24)
+                error("the argument of " + arg + " is out of range");
         } else if (arg == "-l" or arg == "--lives") {
             if (++i >= argc)
                 error("argument of " + arg + " missing");
@@ -46,8 +46,8 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
                 error("the argument of " + arg + " is out of range");
             }
 
-            // if (m_lives < 1 || m_lives > 15)
-            //     error("the argument of " + arg + " is out of range");
+            if (m_lives < 1 || m_lives > 50)
+                error("the argument of " + arg + " is out of range");
         } else if (arg == "-nf" or arg == "--food") {
             if (++i >= argc)
                 error("argument of " + arg + " missing");
@@ -62,8 +62,8 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
                 error("the argument of " + arg + " is out of range");
             }
 
-            // if (m_quant_food < 1 || m_quant_food > 15)
-            //     error("the argument of " + arg + " is out of range");
+            if (m_quant_food < 1 || m_quant_food > 100)
+                error("the argument of " + arg + " is out of range");
         } else if (arg == "-p" or arg == "--playertype") {
             if (++i >= argc)
                 error("argument of " + arg + " missing");
@@ -141,9 +141,13 @@ void SnazeManager::print_usage() const {
               << "\tGame simulation options:\n"
               << "\t\t-h  \t(or --help)       \t       \tPrint this help text.\n"
               << "\t\t-f  \t(or --fps)        \t<num>  \tNumber of frames (board) presented per second.\n"
-              << "\t\t-lx \t(or --lives)      \t<num>  \tNumber of lives the snake shall have. Default = 5.\n"
-              << "\t\t-nf \t(or --food)       \t<num>  \tNumber of food pellets for the entire simulation. Default = 10.\n"
-              << "\t\t-p  \t(or --playertype) \t<type> \tType of snake intelligence: random, backtracking. Default = backtracking\n";
+              << "\t\t    \t                  \t       \tValid range is [1, 24]. Default = 24.\n"
+              << "\t\t-lx \t(or --lives)      \t<num>  \tNumber of lives the snake shall have.\n"
+              << "\t\t    \t                  \t       \tValid range is [1, 50]. Default = 5.\n"
+              << "\t\t-nf \t(or --food)       \t<num>  \tNumber of food pellets for the entire simulation.\n"
+              << "\t\t    \t                  \t       \tValid range is [1, 100]. Default = 10.\n"
+              << "\t\t-p  \t(or --playertype) \t<type> \tType of snake intelligence.\n"
+              << "\t\t    \t                  \t       \tValid types are random, backtracking. Default = backtracking.\n";
 }
 
 void SnazeManager::error(const std::string& error_message) const {

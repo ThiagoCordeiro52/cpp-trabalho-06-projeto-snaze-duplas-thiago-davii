@@ -42,7 +42,7 @@ class SnazeManager {
 
         GameState m_state {START};
         // std::vector<Level> levels;
-        number_type m_fps;
+        number_type m_fps {24};
         number_type m_quant_food {10};
         number_type m_lives {5};
         std::string m_filename;
