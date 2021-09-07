@@ -9,11 +9,12 @@ using std::cin;
 using std::endl;
 
 /// This the main class that represents the snake.
-class snake {
+class Snake {
   public:
-    using positions = std::vector<std::pair<int, int>>;
-    unsigned int lifes = 5;
+    using position = std::vector<std::pair<int, int>>;
 
-    positions body;
+  private:
+    position m_body;
+    unsigned int m_lives;
 };
 #endif
