@@ -20,11 +20,12 @@ struct Level {
         INVISIBLE_WALL,
         SNAKE_HEAD,
         SNAKE_TAIL,
+        FOOD,
     };
 
     using Map = std::vector<std::vector<Tile>>;
 
-    Snake snake;
+    // Snake snake;
     Map level_map;
 };
 

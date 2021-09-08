@@ -11,6 +11,11 @@ using std::vector;
 using std::string;
 #include <fstream>
 using std::ifstream;
+#include <random>
+using std::default_random_engine;
+using std::uniform_int_distribution;
+#include <chrono>
+using std::chrono::system_clock;
 
 #include "level.h"
 
@@ -21,6 +26,7 @@ class SnazeManager {
 
         enum GameState{
             START,          //!< Initial game state.
+            WELCOME,        //!< Print welcome message.
             READING,        //!< Reading data files.
             CREATING_LEVEL, //!< Setting up the level
             THINKING,       //!< Deciding next move
@@ -43,6 +49,7 @@ class SnazeManager {
         void print_usage() const;
         void print_message() const;
         void print_summary() const;
+        void print_map() const;
         void error(const std::string& error_message) const;
 
         GameState m_state {START};
@@ -52,6 +59,6 @@ class SnazeManager {
         number_type m_lives {5};
         std::string m_filename;
         // PlayerType player_type;
-        number_type m_curr_level;
+        number_type m_curr_level {0};
 };
 #endif

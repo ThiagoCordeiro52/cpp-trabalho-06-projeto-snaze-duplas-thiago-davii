@@ -94,6 +94,9 @@ void SnazeManager::process() {
         case START:
             break;
 
+        case WELCOME:
+            break;
+
         case READING: {
             number_type rows;
             number_type columns;
@@ -132,12 +135,20 @@ void SnazeManager::process() {
             }
 
             Level level;
+            level.level_map.reserve(rows);
             for (int i = 0; i < rows; i++) {
-                std::string line;
-                getline(file >> std::ws, line);
-                for(int j = 0; j < columns; j++) {
+                std::string line_str;
+                getline(file >> std::ws, line_str);
+
+                std::vector<Level::Tile> line;
+                line.reserve(columns);
+
+                for (int j = 0; j < columns; j++) {
                     Level::Tile tile;
-                    switch (line[j]) {
+                    switch (line_str[j]) {
+                        case ' ':
+                            tile = Level::Tile::PATH;
+                            break;
                         case '#':
                             tile = Level::Tile::WALL;
                             break;
@@ -148,16 +159,32 @@ void SnazeManager::process() {
                             tile = Level::Tile::INVISIBLE_WALL;
                             break;
                         default:
-                            error("invalid character in " + m_filename);
+                            error("invalid character \"" + std::string{line_str[j]} + "\" in " + m_filename);
                             break;
                     }
-                    level.level_map[i].push_back(tile);
+                    line.push_back(tile);
                 }
+                level.level_map.push_back(line);
             }
+            m_levels.push_back(level);
         } break;
 
-        case CREATING_LEVEL:
-            break;
+        case CREATING_LEVEL: {
+            auto& level {m_levels[m_curr_level]};
+            // Generator of random number betweent 1 and 80
+            std::default_random_engine generator;
+            // Randomize seed to get a different outcome on every execution
+            generator.seed(system_clock::now().time_since_epoch().count());
+
+            using rand_in_range = std::uniform_int_distribution<int>;
+
+            int row, column;
+            do {
+                row = rand_in_range(0, level.level_map.size() - 1)(generator);
+                column = rand_in_range(0, level.level_map[0].size() - 1)(generator);
+            } while (level.level_map[row][column] != Level::PATH);
+            level.level_map[row][column] = Level::FOOD;
+        } break;
 
         default:
             break;
@@ -167,6 +194,10 @@ void SnazeManager::process() {
 void SnazeManager::update() {
     switch (m_state) {
         case START:
+            m_state = WELCOME;
+            break;
+
+        case WELCOME:
             m_state = READING;
             break;
 
@@ -174,26 +205,25 @@ void SnazeManager::update() {
             m_state = CREATING_LEVEL;
             break;
 
+        case CREATING_LEVEL:
+            m_state = THINKING;
+            break;
+
+        case THINKING:
+            m_state = END;
+            break;
+
         default:
             break;
     }
 }
 
-void SnazeManager::print_message() const {
-    std::cout << "--> Welcome to the classic Snake Game <---\n";
-    std::cout << "\t copyright IMD/UFRN 2021.\n";
-    std::cout << "---------------------------------------------------\n";
-}
-
-void SnazeManager::print_summary() const {
-    std::cout << " Levels loaded: " + m_levels.size() + " | Snake Lives: " + m_lives + " | Apples to eat: " + m_quant_food + "\n";
-    std::cout << " Clear all levels to win the game. Good luck!!!"
-    std::cout << "---------------------------------------------------\n";
-}
-
 void SnazeManager::render() const {
     switch (m_state) {
         case START:
+            break;
+
+        case WELCOME:
             print_message();
             break;
 
@@ -201,23 +231,16 @@ void SnazeManager::render() const {
             print_summary();
             break;
 
+        case CREATING_LEVEL:
+            break;
+
+        case THINKING:
+            print_map();
+            break;
+
         default:
             break;
     }
-}
-
-void SnazeManager::print_usage() const {
-    std::cout << "Usage: snaze [<options>] <input_level_file>\n"
-              << "\tGame simulation options:\n"
-              << "\t\t-h  \t(or --help)       \t       \tPrint this help text.\n"
-              << "\t\t-f  \t(or --fps)        \t<num>  \tNumber of frames (board) presented per second.\n"
-              << "\t\t    \t                  \t       \tValid range is [1, 24]. Default = 24.\n"
-              << "\t\t-lx \t(or --lives)      \t<num>  \tNumber of lives the snake shall have.\n"
-              << "\t\t    \t                  \t       \tValid range is [1, 50]. Default = 5.\n"
-              << "\t\t-nf \t(or --food)       \t<num>  \tNumber of food pellets for the entire simulation.\n"
-              << "\t\t    \t                  \t       \tValid range is [1, 100]. Default = 10.\n"
-              << "\t\t-p  \t(or --playertype) \t<type> \tType of snake intelligence.\n"
-              << "\t\t    \t                  \t       \tValid types are random, backtracking. Default = backtracking.\n";
 }
 
 void SnazeManager::error(const std::string& error_message) const {
@@ -234,5 +257,61 @@ void SnazeManager::error(const std::string& error_message) const {
             break;
     }
     exit(1);
+}
+
+void SnazeManager::print_usage() const {
+    std::cout << "Usage: snaze [<options>] <input_level_file>\n"
+              << "\tGame simulation options:\n"
+              << "\t\t-h  \t(or --help)       \t       \tPrint this help text.\n"
+              << "\t\t-f  \t(or --fps)        \t<num>  \tNumber of frames (board) presented per second.\n"
+              << "\t\t    \t                  \t       \tValid range is [1, 24]. Default = 24.\n"
+              << "\t\t-lx \t(or --lives)      \t<num>  \tNumber of lives the snake shall have.\n"
+              << "\t\t    \t                  \t       \tValid range is [1, 50]. Default = 5.\n"
+              << "\t\t-nf \t(or --food)       \t<num>  \tNumber of food pellets for the entire simulation.\n"
+              << "\t\t    \t                  \t       \tValid range is [1, 100]. Default = 10.\n"
+              << "\t\t-p  \t(or --playertype) \t<type> \tType of snake intelligence.\n"
+              << "\t\t    \t                  \t       \tValid types are random, backtracking. Default = backtracking.\n";
+}
+
+void SnazeManager::print_message() const {
+    std::cout << "--> Welcome to the classic Snake Game <---\n";
+    std::cout << "\t copyright IMD/UFRN 2021.\n\n";
+}
+
+void SnazeManager::print_summary() const {
+    std::cout << "--------------------------------------------------------\n";
+    std::cout << " Levels loaded: " << m_levels.size() << " | Snake Lives: " << m_lives << " | Apples to eat: " << m_quant_food << '\n';
+    std::cout << " Clear all levels to win the game. Good luck!!!\n";
+    std::cout << "--------------------------------------------------------\n";
+}
+
+void SnazeManager::print_map() const {
+    const auto& level{m_levels[m_curr_level]};
+
+    for (const auto& line: level.level_map) {
+        for (const auto& tile: line) {
+                switch (tile) {
+                case Level::PATH:
+                    std::cout << ' ';
+                    break;
+                case Level::WALL:
+                    std::cout << '#';
+                    break;
+                case Level::INVISIBLE_WALL:
+                    std::cout << ' ';
+                    break;
+                case Level::SNAKE_HEAD:
+                    std::cout << '>';
+                    break;
+                case Level::SNAKE_TAIL:
+                    std::cout << '=';
+                    break;
+                case Level::FOOD:
+                    std::cout << '@';
+                    break;
+            }
+        }
+        std::cout << '\n';
+    }
 }
 /// teste
