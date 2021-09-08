@@ -94,8 +94,67 @@ void SnazeManager::process() {
         case START:
             break;
 
-        case READING:
-            break;
+        case READING: {
+            number_type rows;
+            number_type columns;
+            std::ifstream file{m_filename};
+
+            if (file.fail()) {
+                error("could not open file \"" + m_filename + "\"");
+            }
+
+            std::string rows_str, columns_str;
+
+            if (not getline(file >> std::ws, rows_str, ' '))
+                error("could not read rows number from file \"" + m_filename + "\"");
+
+            try {
+                rows = static_cast<number_type>(std::stoul(rows_str));
+            }
+            catch (const std::invalid_argument& e) {
+                error("the number of the rows is not an integer");
+            }
+            catch (const std::out_of_range& e) {
+                error("the number of the rows is out of range");
+            }
+
+            if (not getline(file >> std::ws, columns_str))
+                error("could not read columns number from file \"" + m_filename + "\"");
+
+            try {
+                columns = static_cast<number_type>(std::stoul(columns_str));
+            }
+            catch (const std::invalid_argument& e) {
+                error("the number of the columns is not an integer");
+            }
+            catch (const std::out_of_range& e) {
+                error("the number of the columns is out of range");
+            }
+
+            Level level;
+            for (int i = 0; i < rows; i++) {
+                std::string line;
+                getline(file >> std::ws, line);
+                for(int j = 0; j < columns; j++) {
+                    Level::Tile tile;
+                    switch (line[j]) {
+                        case '#':
+                            tile = Level::Tile::WALL;
+                            break;
+                        case '*':
+                            tile = Level::Tile::SNAKE_HEAD;
+                            break;
+                        case '.':
+                            tile = Level::Tile::INVISIBLE_WALL;
+                            break;
+                        default:
+                            error("invalid character in " + m_filename);
+                            break;
+                    }
+                    level.level_map[i].push_back(tile);
+                }
+            }
+        } break;
 
         case CREATING_LEVEL:
             break;
@@ -112,6 +171,7 @@ void SnazeManager::update() {
             break;
 
         case READING:
+            m_state = CREATING_LEVEL;
             break;
 
         default:
@@ -122,16 +182,23 @@ void SnazeManager::update() {
 void SnazeManager::print_message() const {
     std::cout << "--> Welcome to the classic Snake Game <---\n";
     std::cout << "\t copyright IMD/UFRN 2021.\n";
-    std::cout << "---------------------------------------------------\n\n";
+    std::cout << "---------------------------------------------------\n";
+}
+
+void SnazeManager::print_summary() const {
+    std::cout << " Levels loaded: " + m_levels.size() + " | Snake Lives: " + m_lives + " | Apples to eat: " + m_quant_food + "\n";
+    std::cout << " Clear all levels to win the game. Good luck!!!"
+    std::cout << "---------------------------------------------------\n";
 }
 
 void SnazeManager::render() const {
     switch (m_state) {
-        case GameState::START:
+        case START:
             print_message();
             break;
 
-        case GameState::READING:
+        case READING:
+            print_summary();
             break;
 
         default:

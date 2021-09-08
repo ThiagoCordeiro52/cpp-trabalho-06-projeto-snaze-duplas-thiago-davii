@@ -12,7 +12,7 @@ Preencha os dados abaixo para identificar a autoria do trabalho.
 
 # Indique quais itens da avaliação foram realizados
 
-- [ ] Valida corretamente arquivo de entrada (20 pontos)
+- [X] Valida corretamente arquivo de entrada (20 pontos)
 
 - [ ] Simulador apenas sugere direções randômicas para cobra (10 pontos)
 OU

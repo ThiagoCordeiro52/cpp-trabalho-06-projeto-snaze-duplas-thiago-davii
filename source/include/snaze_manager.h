@@ -9,6 +9,8 @@ using std::endl;
 using std::vector;
 #include <string>
 using std::string;
+#include <fstream>
+using std::ifstream;
 
 #include "level.h"
 
@@ -40,10 +42,11 @@ class SnazeManager {
     private:
         void print_usage() const;
         void print_message() const;
+        void print_summary() const;
         void error(const std::string& error_message) const;
 
         GameState m_state {START};
-        // std::vector<Level> levels;
+        std::vector<Level> m_levels;
         number_type m_fps {24};
         number_type m_quant_food {10};
         number_type m_lives {5};
