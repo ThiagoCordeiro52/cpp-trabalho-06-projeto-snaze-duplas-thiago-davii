@@ -5,8 +5,6 @@
 using std::cout;
 using std::cin;
 using std::endl;
-#include <vector>
-using std::vector;
 #include <string>
 using std::string;
 #include <fstream>
@@ -16,6 +14,10 @@ using std::default_random_engine;
 using std::uniform_int_distribution;
 #include <chrono>
 using std::chrono::system_clock;
+using std::chrono::milliseconds;
+#include <thread>
+#include <queue>
+using std::queue;
 
 #include "level.h"
 
@@ -32,7 +34,8 @@ class SnazeManager {
             THINKING,       //!< Deciding next move
             MOVING,         //!< Moving the snake
             CRASH,          //!< Handling snake crash
-            QUIT_GAME,      //!< User choose to leave the game.
+            WIN_GAME,       //!< Handling the case where the player wins
+            LOSE_GAME,      //!< Handling the case where the player loses
             END,            //!< Final game state.
         };
         
@@ -53,12 +56,12 @@ class SnazeManager {
         void error(const std::string& error_message) const;
 
         GameState m_state {START};
-        std::vector<Level> m_levels;
+        std::queue<Level> m_levels;
         number_type m_fps {24};
         number_type m_quant_food {10};
         number_type m_lives {5};
         std::string m_filename;
-        // PlayerType player_type;
-        number_type m_curr_level {0};
+        PlayerType m_player_type;
+        std::deque<Snake::Instruction> m_instructions;
 };
 #endif

@@ -1,5 +1,32 @@
 #include "snaze_manager.h"
 
+std::ostream& operator<<(std::ostream& os, const Snake::Instruction& instruction) {
+    switch (instruction) {
+        case Snake::MOVE:
+            os << "MOVE";
+            break;
+        case Snake::ROTATE_LEFT:
+            os << "ROTATE_LEFT";
+            break;
+        case Snake::ROTATE_RIGHT:
+            os << "ROTATE_RIGHT";
+            break;
+        case Snake::ENLARGE:
+            os << "ENLARGE";
+            break;
+    }
+
+    return os;
+}
+// 
+// std::ostream& operator<<(std::ostream& os, const std::deque<Snake::Instruction>& instructions) {
+//     for (const auto& instruction: instructions) {
+//         std::cout << instruction << ' ';
+//     }
+// 
+//     return os;
+// }
+
 //====================[ SNAZE MANAGER METHODS ]========================//
 std::string to_lowercase(const std::string& str) {
     auto clone = str;
@@ -71,9 +98,9 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
             std::string arg2 {argv[i]};
 
             if (arg2 == "random" or arg2 == "r") {
-                // set player_type;
+                m_player_type = RANDOM;
             } else if (arg2 == "backtracking" or arg2 == "b") {
-                // set player_type;
+                m_player_type = BACKTRACKING;
             } else {
                 error("invalid argument \"" + arg2 + "\" given to " + arg);
             }
@@ -98,92 +125,103 @@ void SnazeManager::process() {
             break;
 
         case READING: {
-            number_type rows;
-            number_type columns;
             std::ifstream file{m_filename};
+            while (not file.eof()) {
+                number_type rows;
+                number_type columns;
 
-            if (file.fail()) {
-                error("could not open file \"" + m_filename + "\"");
-            }
-
-            std::string rows_str, columns_str;
-
-            if (not getline(file >> std::ws, rows_str, ' '))
-                error("could not read rows number from file \"" + m_filename + "\"");
-
-            try {
-                rows = static_cast<number_type>(std::stoul(rows_str));
-            }
-            catch (const std::invalid_argument& e) {
-                error("the number of the rows is not an integer");
-            }
-            catch (const std::out_of_range& e) {
-                error("the number of the rows is out of range");
-            }
-
-            if (not getline(file >> std::ws, columns_str))
-                error("could not read columns number from file \"" + m_filename + "\"");
-
-            try {
-                columns = static_cast<number_type>(std::stoul(columns_str));
-            }
-            catch (const std::invalid_argument& e) {
-                error("the number of the columns is not an integer");
-            }
-            catch (const std::out_of_range& e) {
-                error("the number of the columns is out of range");
-            }
-
-            Level level;
-            level.level_map.reserve(rows);
-            for (int i = 0; i < rows; i++) {
-                std::string line_str;
-                getline(file >> std::ws, line_str);
-
-                std::vector<Level::Tile> line;
-                line.reserve(columns);
-
-                for (int j = 0; j < columns; j++) {
-                    Level::Tile tile;
-                    switch (line_str[j]) {
-                        case ' ':
-                            tile = Level::Tile::PATH;
-                            break;
-                        case '#':
-                            tile = Level::Tile::WALL;
-                            break;
-                        case '*':
-                            tile = Level::Tile::SNAKE_HEAD;
-                            break;
-                        case '.':
-                            tile = Level::Tile::INVISIBLE_WALL;
-                            break;
-                        default:
-                            error("invalid character \"" + std::string{line_str[j]} + "\" in " + m_filename);
-                            break;
-                    }
-                    line.push_back(tile);
+                if (file.fail()) {
+                    error("could not open file \"" + m_filename + "\"");
                 }
-                level.level_map.push_back(line);
+
+                std::string rows_str, columns_str;
+
+                if (not getline(file >> std::ws, rows_str, ' '))
+                    error("could not read rows number from file \"" + m_filename + "\"");
+
+                try {
+                    rows = static_cast<number_type>(std::stoul(rows_str));
+                }
+                catch (const std::invalid_argument& e) {
+                    error("the number of the rows is not an integer");
+                }
+                catch (const std::out_of_range& e) {
+                    error("the number of the rows is out of range");
+                }
+
+                if (not getline(file >> std::ws, columns_str))
+                    error("could not read columns number from file \"" + m_filename + "\"");
+
+                try {
+                    columns = static_cast<number_type>(std::stoul(columns_str));
+                }
+                catch (const std::invalid_argument& e) {
+                    error("the number of the columns is not an integer");
+                }
+                catch (const std::out_of_range& e) {
+                    error("the number of the columns is out of range");
+                }
+
+                Level level;
+                level.level_map.reserve(rows + 2);
+                level.level_map.emplace_back(columns + 2, Level::INVISIBLE_WALL);
+                for (int i = 1; i <= rows; i++) {
+                    std::string line_str;
+                    getline(file >> std::ws, line_str);
+
+                    std::vector<Level::Tile> line {Level::INVISIBLE_WALL};
+                    line.reserve(columns + 2);
+
+                    for (int j = 1; j <= columns; j++) {
+                        Level::Tile tile;
+                        switch (line_str[j - 1]) {
+                            case ' ':
+                                tile = Level::Tile::PATH;
+                                break;
+                            case '#':
+                                tile = Level::Tile::WALL;
+                                break;
+                            case '*':
+                                level.snake = Snake{std::make_pair(i, j), m_lives};
+                                tile = Level::Tile::SNAKE;
+                                break;
+                            case '.':
+                                tile = Level::Tile::INVISIBLE_WALL;
+                                break;
+                            default:
+                                error("invalid character \"" + std::string{line_str[j - 1]} + "\" in " + m_filename);
+                                break;
+                        }
+                        line.push_back(tile);
+                    }
+                    line.push_back(Level::INVISIBLE_WALL);
+                    level.level_map.push_back(line);
+                }
+                level.level_map.emplace_back(columns + 2, Level::INVISIBLE_WALL);
+                m_levels.push(level);
+
+                file >> std::ws;
             }
-            m_levels.push_back(level);
-        } break;
+         } break;
 
         case CREATING_LEVEL: {
-            auto& level {m_levels[m_curr_level]};
-            // Generator of random number betweent 1 and 80
+            auto& level {m_levels.front()};
             std::default_random_engine generator;
-            // Randomize seed to get a different outcome on every execution
             generator.seed(system_clock::now().time_since_epoch().count());
 
             using rand_in_range = std::uniform_int_distribution<int>;
 
             int row, column;
             do {
-                row = rand_in_range(0, level.level_map.size() - 1)(generator);
-                column = rand_in_range(0, level.level_map[0].size() - 1)(generator);
+                row = rand_in_range(1, level.level_map.size() - 2)(generator);
+                column = rand_in_range(1, level.level_map[0].size() - 2)(generator);
             } while (level.level_map[row][column] != Level::PATH);
             level.level_map[row][column] = Level::FOOD;
+        } break;
+
+        case THINKING: {
+            auto& level {m_levels.front()};
+            m_instructions = level.find_path(m_player_type);
         } break;
 
         default:
@@ -210,6 +248,60 @@ void SnazeManager::update() {
             break;
 
         case THINKING:
+            m_state = MOVING;
+            break;
+
+        case MOVING: {
+            if (m_instructions.empty()) {
+                std::cout << "end of instructions\n";
+                m_state = END;
+                break;
+            }
+            auto& next_instruction {m_instructions.front()};
+            m_instructions.pop_front();
+            auto& curr_level {m_levels.front()};
+
+            std::cout << next_instruction << '\n';
+
+            switch (next_instruction) {
+                case Snake::MOVE: {
+                    auto removed {curr_level.snake.tail()};
+
+                    curr_level.snake.move();
+
+                    auto added {curr_level.snake.head()};
+
+                    curr_level.level_map[removed.first][removed.second] = Level::PATH;
+
+                    auto& added_tile = curr_level.level_map[added.first][added.second];
+                    if (added_tile == Level::PATH)
+                        added_tile = Level::SNAKE;
+                    else
+                        m_state = LOSE_GAME;
+                } break;
+                case Snake::ENLARGE: {
+                    curr_level.snake.enlarge();
+
+                    auto added {curr_level.snake.head()};
+                    curr_level.level_map[added.first][added.second] = Level::SNAKE;
+
+                    m_state = CREATING_LEVEL;
+                } break;
+                case Snake::ROTATE_LEFT:
+                    curr_level.snake.rotate(Snake::LEFT);
+                    break;
+                case Snake::ROTATE_RIGHT:
+                    curr_level.snake.rotate(Snake::RIGHT);
+                    break;
+            }
+
+        } break;
+
+        case LOSE_GAME:
+            m_state = END;
+            break;
+
+        case WIN_GAME:
             m_state = END;
             break;
 
@@ -235,7 +327,19 @@ void SnazeManager::render() const {
             break;
 
         case THINKING:
+            break;
+
+        case MOVING:
+            std::this_thread::sleep_for(milliseconds{1000/m_fps});
             print_map();
+            break;
+
+        case LOSE_GAME:
+            std::cout << "You lost!\n";
+            break;
+
+        case WIN_GAME:
+            std::cout << "You won!\n";
             break;
 
         default:
@@ -286,11 +390,11 @@ void SnazeManager::print_summary() const {
 }
 
 void SnazeManager::print_map() const {
-    const auto& level{m_levels[m_curr_level]};
+    const auto& level{m_levels.front()};
 
     for (const auto& line: level.level_map) {
         for (const auto& tile: line) {
-                switch (tile) {
+            switch (tile) {
                 case Level::PATH:
                     std::cout << ' ';
                     break;
@@ -300,11 +404,11 @@ void SnazeManager::print_map() const {
                 case Level::INVISIBLE_WALL:
                     std::cout << ' ';
                     break;
-                case Level::SNAKE_HEAD:
-                    std::cout << '>';
-                    break;
-                case Level::SNAKE_TAIL:
-                    std::cout << '=';
+                // case Level::SNAKE_HEAD:
+                //     std::cout << '>';
+                //     break;
+                case Level::SNAKE:
+                    std::cout << '*';
                     break;
                 case Level::FOOD:
                     std::cout << '@';
