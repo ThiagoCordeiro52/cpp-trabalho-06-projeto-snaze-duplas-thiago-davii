@@ -52,11 +52,13 @@ class Snake {
         void move();
         void enlarge();
         void backup();
-        void reset();
+        void reset_backup();
+        void reset(Position& pos);
         const Position& head() const;
         const Position& tail() const;
-        // Path::iterator begin();
-        // Path::iterator end();
+        bool dead() const;
+        Path::iterator begin();
+        Path::iterator end();
         // Path::const_iterator cbegin() const;
         // Path::const_iterator cend() const;
 
@@ -82,6 +84,7 @@ struct Level {
         // SNAKE_TAIL,
         SNAKE,
         FOOD,
+        // CRASH,
     };
 
     using Map = std::vector<std::vector<Tile>>;
@@ -89,6 +92,8 @@ struct Level {
 
     Snake snake;
     Map level_map;
+    Position initial_pos;
+    unsigned int quant_food;
 };
 
 #endif

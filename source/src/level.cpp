@@ -91,7 +91,7 @@ void Snake::backup() {
     m_backup.emplace(Backup{m_body, m_facing});
 }
 
-void Snake::reset() {
+void Snake::reset_backup() {
     if (not m_backup.has_value())
         throw std::runtime_error("the body of the snake was not backed up");
     m_body = m_backup.value().body;
@@ -107,13 +107,26 @@ const Position& Snake::tail() const {
     return m_body.back();
 }
 
-// Path::iterator Snake::begin() {
-//     return m_body.begin();
-// }
-// 
-// Path::iterator Snake::end() {
-//     return m_body.end();
-// }
+void Snake::reset(Position& pos) {
+    // m_body.clear();
+    // m_body.push_front(pos);
+    m_body = {pos};
+    m_backup.reset();
+    m_facing = EAST;
+    m_lives -= 1;
+}
+
+bool Snake::dead() const {
+    return m_lives <= 0;
+}
+
+Path::iterator Snake::begin() {
+    return m_body.begin();
+}
+
+Path::iterator Snake::end() {
+    return m_body.end();
+}
 // 
 // Path::const_iterator Snake::cbegin() const {
 //     return m_body.cbegin();
@@ -145,7 +158,7 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
                     auto& tile = map_copy[pos.first][pos.second];
                     if (tile == FOOD) {
                         instructions.push_back(Snake::ENLARGE);
-                        snake.reset();
+                        snake.reset_backup();
                         return instructions;
                     }
                     else if (tile == PATH) {
@@ -169,7 +182,7 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
                 if (to_continue)
                     continue;
 
-                snake.reset();
+                snake.reset_backup();
                 return instructions;
             }
         } break;
