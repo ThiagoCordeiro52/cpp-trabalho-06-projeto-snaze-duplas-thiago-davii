@@ -453,22 +453,22 @@ void SnazeManager::print_map() const {
         for (const auto& tile: line) {
             switch (tile) {
                 case Level::PATH:
-                    std::cout << ' ';
+                    std::cout << " ";
                     break;
                 case Level::WALL:
-                    std::cout << '#';
+                    std::cout << u8"█";
                     break;
                 case Level::INVISIBLE_WALL:
-                    std::cout << ' ';
+                    std::cout << " ";
                     break;
                 // case Level::SNAKE_HEAD:
                 //     std::cout << '>';
                 //     break;
                 case Level::SNAKE:
-                    std::cout << '*';
+                    std::cout << u8"◉";
                     break;
                 case Level::FOOD:
-                    std::cout << '@';
+                    std::cout << u8"🪳";
                     break;
             //     case Level::CRASH:
             //         std::cout << 'X';
