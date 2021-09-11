@@ -12,6 +12,8 @@ using std::pair;
 using std::optional;
 #include <stdexcept>
 using std::runtime_error;
+#include <array>
+using std::array;
 
 using Position = std::pair<int, int>;
 using Path = std::deque<Position>;
@@ -25,52 +27,63 @@ enum PlayerType {
 
 class Snake {
     public:
-        enum Direction {
-            LEFT,
-            RIGHT,
-        };
+        // enum Direction {
+        //     LEFT,
+        //     RIGHT,
+        // };
 
-        enum Orientation {
+        enum Direction {
             NORTH,
             SOUTH,
             EAST,
             WEST,
         };
 
-        enum Instruction {
-            ROTATE_LEFT,
-            ROTATE_RIGHT,
+        constexpr static Direction directions [4] = {NORTH, SOUTH, EAST, WEST};
+
+        enum Command {
+            // ROTATE_LEFT,
+            // ROTATE_RIGHT,
             MOVE,
             ENLARGE,
         };
 
-        Snake() : m_body{}, m_backup{}, m_lives{0}, m_facing{EAST} {/* empty */}
-        Snake(Position start, unsigned int lives) : m_body{start}, m_backup{}, m_lives{lives}, m_facing{EAST} {/* empty */}
+        using Instruction = std::pair<Command, Direction>;
 
-        void rotate(Direction direction=LEFT);
-        Position next_move() const;
-        void move();
-        void enlarge();
+        // Snake() : m_body{}, m_backup{}, m_lives{0}, m_facing{EAST} {/* empty */}
+        // Snake(Position start, unsigned int lives) : m_body{start}, m_backup{}, m_lives{lives}, m_facing{EAST} {/* empty */}
+
+        Snake() : m_body{}, m_backup{}, m_lives{0} {/* empty */}
+        Snake(Position start, unsigned int lives) : m_body{start}, m_backup{}, m_lives{lives} {/* empty */}
+
+        // void rotate(Direction direction=LEFT);
+        Position next_move(Direction facing) const;
+        // void move();
+        void move(Direction facing);
+        void enlarge(Direction facing);
         void backup();
         void reset_backup();
         void reset(Position& pos);
         const Position& head() const;
         const Position& tail() const;
         bool dead() const;
+        std::array <Position, 4>  possible_moves() const;
         Path::iterator begin();
         Path::iterator end();
         // Path::const_iterator cbegin() const;
         // Path::const_iterator cend() const;
 
     private:
-        struct Backup {
-            Path body;
-            Orientation facing;
-        };
+        // struct Backup {
+        //     Path body;
+        //     Orientation facing;
+        // };
+
         Path m_body;
-        std::optional<Backup> m_backup;
+        // std::optional<Backup> m_backup;
+        std::optional<Path> m_backup;
         unsigned int m_lives;
-        Orientation m_facing;
+        // Orientation m_facing;
 
         // friend class Level;
 };

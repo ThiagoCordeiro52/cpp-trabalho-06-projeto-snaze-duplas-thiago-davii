@@ -33,33 +33,33 @@
 //     return os;
 // }
 
-void Snake::rotate(Direction direction) {
-    if (direction == LEFT) {
-        if (m_facing == NORTH)
-            m_facing = WEST;
-        else if (m_facing == SOUTH)
-            m_facing = EAST;
-        else if (m_facing == EAST)
-            m_facing = NORTH;
-        else if (m_facing == WEST)
-            m_facing = SOUTH;
-    } else if (direction == RIGHT) {
-        if (m_facing == NORTH)
-            m_facing = EAST;
-        else if (m_facing == SOUTH)
-            m_facing = WEST;
-        else if (m_facing == EAST)
-            m_facing = SOUTH;
-        else if (m_facing == WEST)
-            m_facing = NORTH;
-    }
-}
+// void Snake::rotate(Direction direction) {
+//     if (direction == LEFT) {
+//         if (m_facing == NORTH)
+//             m_facing = WEST;
+//         else if (m_facing == SOUTH)
+//             m_facing = EAST;
+//         else if (m_facing == EAST)
+//             m_facing = NORTH;
+//         else if (m_facing == WEST)
+//             m_facing = SOUTH;
+//     } else if (direction == RIGHT) {
+//         if (m_facing == NORTH)
+//             m_facing = EAST;
+//         else if (m_facing == SOUTH)
+//             m_facing = WEST;
+//         else if (m_facing == EAST)
+//             m_facing = SOUTH;
+//         else if (m_facing == WEST)
+//             m_facing = NORTH;
+//     }
+// }
 
-Position Snake::next_move() const {
+Position Snake::next_move(Direction facing) const {
     auto& head {m_body.front()};
 
     Position pos;
-    switch (m_facing) {
+    switch (facing) {
         case NORTH:
             pos = std::make_pair(head.first - 1, head.second);
             break;
@@ -77,25 +77,36 @@ Position Snake::next_move() const {
     return pos;
 }
 
-void Snake::move() {
+// void Snake::move() {
+//     m_body.pop_back();
+
+//     m_body.push_front(next_move());
+// }
+
+void Snake::move(Direction facing) {
     m_body.pop_back();
 
-    m_body.push_front(next_move());
+    m_body.push_front(next_move(facing));
 }
 
-void Snake::enlarge() {
-    m_body.push_front(next_move());
+void Snake::enlarge(Direction facing) {
+    m_body.push_front(next_move(facing));
 }
+
+// void Snake::backup() {
+//     m_backup.emplace(Backup{m_body, m_facing});
+// }
 
 void Snake::backup() {
-    m_backup.emplace(Backup{m_body, m_facing});
+    m_backup.emplace(m_body);
 }
 
 void Snake::reset_backup() {
     if (not m_backup.has_value())
         throw std::runtime_error("the body of the snake was not backed up");
-    m_body = m_backup.value().body;
-    m_facing = m_backup.value().facing;
+    // m_body = m_backup.value().body;
+    m_body = m_backup.value();
+    // m_facing = m_backup.value().facing;
     m_backup.reset();
 }
 
@@ -112,7 +123,7 @@ void Snake::reset(Position& pos) {
     // m_body.push_front(pos);
     m_body = {pos};
     m_backup.reset();
-    m_facing = EAST;
+    // m_facing = EAST;
     m_lives -= 1;
 }
 
@@ -136,58 +147,113 @@ Path::iterator Snake::end() {
 //     return m_body.cend();
 // }
 
+std::array <Position, 4> Snake::possible_moves() const {
+    const auto & head = m_body.front(); 
+    return {
+        std::make_pair(head.first, head.second + 1), 
+        std::make_pair(head.first, head.second - 1),
+        std::make_pair(head.first + 1, head.second),
+        std::make_pair(head.first - 1, head.second),
+    };
+}
+
 std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
     switch (type) {
         case RANDOM: {
-            std::deque<Snake::Instruction> instructions;
-            auto map_copy = level_map;
-            snake.backup();
+            // std::deque<Snake::Instruction> instructions;
+            // auto map_copy = level_map;
+            // snake.backup();
 
-            while (true) {
-                bool to_continue {false};
-                Position pos;
-                // auto dir {static_cast<Snake::Direction>(rand() % 2)};
+            // while (true) {
+            //     bool to_continue {false};
+            //     Position pos;
+            //     // auto dir {static_cast<Snake::Direction>(rand() % 2)};
                 
-                for (int i {0}; i < (rand() % 4); i++) {
-                    instructions.push_back(Snake::ROTATE_LEFT);
-                    snake.rotate();
-                }
-                for (int i {0}; i < 4; i++) {
-                    pos = snake.next_move();
+            //     for (int i {0}; i < (rand() % 4); i++) {
+            //         instructions.push_back(Snake::ROTATE_LEFT);
+            //         snake.rotate();
+            //     }
+            //     for (int i {0}; i < 4; i++) {
+            //         pos = snake.next_move();
 
-                    auto& tile = map_copy[pos.first][pos.second];
-                    if (tile == FOOD) {
-                        instructions.push_back(Snake::ENLARGE);
-                        snake.reset_backup();
-                        return instructions;
-                    }
-                    else if (tile == PATH) {
-                        tile = SNAKE;
-                        to_continue = true;
-                        break;
-                    }
+            //         auto& tile = map_copy[pos.first][pos.second];
+            //         if (tile == FOOD) {
+            //             instructions.push_back(Snake::ENLARGE);
+            //             snake.reset_backup();
+            //             return instructions;
+            //         }
+            //         else if (tile == PATH) {
+            //             tile = SNAKE;
+            //             to_continue = true;
+            //             break;
+            //         }
 
-                    snake.rotate();
-                    instructions.push_back(Snake::ROTATE_LEFT);
-                    // snake.rotate(dir);
-                    // instructions.push_back(static_cast<Snake::Instruction>(dir));
-                }
+            //         // snake.rotate();
+            //         instructions.push_back(Snake::ROTATE_LEFT);
+            //         // snake.rotate(dir);
+            //         // instructions.push_back(static_cast<Snake::Instruction>(dir));
+            //     }
 
-                // found_path.push_back(pos);
-                instructions.push_back(Snake::MOVE);
-                auto& to_remove {snake.tail()};
-                snake.move();
-                map_copy[to_remove.first][to_remove.second] = PATH;
+            //     // found_path.push_back(pos);
+            //     instructions.push_back(Snake::MOVE);
+            //     auto& to_remove {snake.tail()};
+            //     snake.move();
+            //     map_copy[to_remove.first][to_remove.second] = PATH;
 
-                if (to_continue)
-                    continue;
+            //     if (to_continue)
+            //         continue;
 
-                snake.reset_backup();
-                return instructions;
-            }
+            //     snake.reset_backup();
+            //     return instructions;
+            // }
         } break;
-        case BACKTRACKING:
-            return {};
+        case BACKTRACKING: {
+            // Vector contains the possibles paths to food [X]
+            std::deque<std::pair <std::deque<Snake::Instruction>, Snake>> paths;
+            auto map_copy = level_map;
+            for (const auto& pos : snake) {
+                map_copy[pos.first][pos.second] = PATH;
+            }
+            snake.backup();
+            paths.emplace_back(std::deque<Snake::Instruction>{}, snake);
+
+            // Vetor de cobras [X]
+            // Iterar vetor de cobras [X]
+            while (not paths.empty()) {
+                auto & curr_path = paths.front();
+                for (const auto& pos: curr_path.second) {
+                    map_copy[pos.first][pos.second] = SNAKE;
+                }
+                // Ver todas as posições que a cobra pode andar [X]
+                for (auto direction : Snake::directions) {
+                    auto pos = curr_path.second.next_move(direction);
+                    const auto & tile = map_copy[pos.first][pos.second];
+                    // Se em uma das posições tiver comida, retorna o path atual. [X]
+                    if (tile == FOOD) {
+                        curr_path.first.emplace_back(Snake::ENLARGE, direction);
+                        return curr_path.first;
+                    }
+                    // Para cada posição, uma nova cobra [X]
+                    else if (tile == PATH) {
+                        auto new_path = curr_path;
+                        new_path.first.emplace_back(Snake::MOVE, direction);
+                        new_path.second.move(direction);
+                        // Adiciona no vetor de cobras []
+                        paths.push_back(new_path);
+                    }
+
+                }
+
+                for (const auto& pos: curr_path.second) {
+                    map_copy[pos.first][pos.second] = PATH;
+                }
+
+                // Remover a cobra atual []
+                paths.pop_front();
+            };
+            return find_path(RANDOM);
+        }
+        break;
     }
 }
 

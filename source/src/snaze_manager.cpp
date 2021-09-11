@@ -465,10 +465,10 @@ void SnazeManager::print_map() const {
                 //     std::cout << '>';
                 //     break;
                 case Level::SNAKE:
-                    std::cout << u8"◉";
+                    std::cout << u8"♦";
                     break;
                 case Level::FOOD:
-                    std::cout << u8"🪳";
+                    std::cout << u8"@";
                     break;
             //     case Level::CRASH:
             //         std::cout << 'X';
