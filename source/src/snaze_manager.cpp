@@ -1,32 +1,5 @@
 #include "snaze_manager.h"
 
-std::ostream& operator<<(std::ostream& os, const Snake::Instruction& instruction) {
-    switch (instruction) {
-        case Snake::MOVE:
-            os << "MOVE";
-            break;
-        case Snake::ROTATE_LEFT:
-            os << "ROTATE_LEFT";
-            break;
-        case Snake::ROTATE_RIGHT:
-            os << "ROTATE_RIGHT";
-            break;
-        case Snake::ENLARGE:
-            os << "ENLARGE";
-            break;
-    }
-
-    return os;
-}
-// 
-// std::ostream& operator<<(std::ostream& os, const std::deque<Snake::Instruction>& instructions) {
-//     for (const auto& instruction: instructions) {
-//         std::cout << instruction << ' ';
-//     }
-// 
-//     return os;
-// }
-
 //====================[ SNAZE MANAGER METHODS ]========================//
 std::string to_lowercase(const std::string& str) {
     auto clone = str;
@@ -224,7 +197,6 @@ void SnazeManager::process() {
 
         case THINKING: {
             auto& level {m_levels.front()};
-            // std::cout << "thinking\n";
             m_instructions = level.find_path(m_player_type);
         } break;
 
@@ -287,14 +259,14 @@ void SnazeManager::update() {
                 m_instructions.pop_front();
                 auto& curr_level {m_levels.front()};
 
-                switch (next_instruction) {
+                switch (next_instruction.first) {
                     case Snake::MOVE: {
                         auto& removed {curr_level.snake.tail()};
-                        auto added {curr_level.snake.next_move()};
+                        auto added {curr_level.snake.next_move(next_instruction.second)};
                         auto& added_tile = curr_level.level_map[added.first][added.second];
 
                         if (added_tile == Level::PATH) {
-                            curr_level.snake.move();
+                            curr_level.snake.move(next_instruction.second);
                             added_tile = Level::SNAKE;
                             curr_level.level_map[removed.first][removed.second] = Level::PATH;
                         }
@@ -304,7 +276,7 @@ void SnazeManager::update() {
                         }
                     } break;
                     case Snake::ENLARGE: {
-                        curr_level.snake.enlarge();
+                        curr_level.snake.enlarge(next_instruction.second);
 
                         auto added {curr_level.snake.head()};
                         curr_level.level_map[added.first][added.second] = Level::SNAKE;
@@ -325,14 +297,14 @@ void SnazeManager::update() {
                             }
                         }
                     } break;
-                    case Snake::ROTATE_LEFT:
-                        curr_level.snake.rotate(Snake::LEFT);
-                        to_continue = true;
-                        break;
-                    case Snake::ROTATE_RIGHT:
-                        curr_level.snake.rotate(Snake::RIGHT);
-                        to_continue = true;
-                        break;
+                    // case Snake::ROTATE_LEFT:
+                    //     curr_level.snake.rotate(Snake::LEFT);
+                    //     to_continue = true;
+                    //     break;
+                    // case Snake::ROTATE_RIGHT:
+                    //     curr_level.snake.rotate(Snake::RIGHT);
+                    //     to_continue = true;
+                    //     break;
                 }
             } while (to_continue);
         } break;

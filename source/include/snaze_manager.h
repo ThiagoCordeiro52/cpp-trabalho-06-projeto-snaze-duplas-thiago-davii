@@ -9,9 +9,6 @@ using std::endl;
 using std::string;
 #include <fstream>
 using std::ifstream;
-#include <random>
-using std::default_random_engine;
-using std::uniform_int_distribution;
 #include <chrono>
 using std::chrono::system_clock;
 using std::chrono::milliseconds;
@@ -61,7 +58,7 @@ class SnazeManager {
         number_type m_quant_food {10};
         number_type m_lives {5};
         std::string m_filename;
-        PlayerType m_player_type;
+        PlayerType m_player_type {BACKTRACKING};
         std::deque<Snake::Instruction> m_instructions;
 };
 #endif
