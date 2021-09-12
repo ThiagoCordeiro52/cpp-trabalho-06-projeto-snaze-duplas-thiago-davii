@@ -26,6 +26,7 @@ using std::uniform_int_distribution;
 using Position = std::pair<int, int>;
 using Path = std::deque<Position>;
 
+// Type of player that chooses the directions of the snake
 enum PlayerType {
     RANDOM,
     BACKTRACKING,
@@ -52,15 +53,79 @@ class Snake {
         Snake() : m_body{} {/* empty */}
         Snake(Position start) : m_body{start} {/* empty */}
 
+        /**
+        * @brief Calculates which position the snake will move to next
+        *
+        * @param facing direction where the snake is looking
+        *
+        * @return a pair with the coordinates of the next position the snake will move
+        */
         Position next_move(Direction facing) const;
+
+        /**
+        * @brief moves the snake to the next position it is looking at
+        *
+        * @param facing direction where the snake is looking at
+        *
+        */
         void move(Direction facing);
+
+        /**
+        * @brief increases snake size by one position
+        *
+        * @param facing direction where the snake is looking at
+        *
+        */
         void enlarge(Direction facing);
+
+        /**
+        * @brief resets the snake's size if it hits a wall or your body
+        *
+        * @param pos a pair with the coordinates where the snake will be after the body is reset
+        *
+        */
         void reset(Position& pos);
+
+        /**
+        *
+        * @return a pair with snake head positions
+        */
         const Position& head() const;
+
+        /**
+        *
+        * @return a pair with the last position of the snake's tail
+        *
+        */
         const Position& tail() const;
+
+
+        /**
+        *
+        * @return the last direction the snake moved
+        *
+        */
         const Direction& last_direction() const;
+
+        /**
+        *
+        * @return an array with the four possible directions the snake can move
+        *
+        */
         std::array <Position, 4>  possible_moves() const;
+
+        /**
+        *
+        * @return an iterator to the snake's first body position
+        *
+        */
         Path::iterator begin();
+
+        /**
+        *
+        * @return an iterator to the snake's last body position
+        *
+        */
         Path::iterator end();
 
     private:
@@ -75,7 +140,6 @@ struct Level {
         INVISIBLE_WALL,
         SNAKE_HEAD,
         SNAKE_TAIL,
-        // SNAKE,
         FOOD,
         CRASH,
     };

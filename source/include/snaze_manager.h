@@ -40,17 +40,63 @@ class SnazeManager {
         SnazeManager(int argc, char *argv[]);
 
         // Public methods
+
+        /**
+        *
+        * @return true if state is END and false otherwise
+        *
+        */
         bool has_ended() const { return m_state == END; }
+        
+        /**
+        * @brief performs game processing in each state
+        *
+        */
         void process();
+
+        /**
+        * @brief update the game in each state
+        *
+        */
         void update();
+
+        /**
+        * @brief sends information to standart output in each state
+        *
+        */
         void render() const;
   
     private:
         // Private methods
+        /**
+        * @brief print game usage options
+        *
+        */
         void print_usage() const;
+
+        /**
+        * @brief print welcome message
+        *
+        */
         void print_message() const;
+
+        /**
+        * @brief print the summary of the game
+        *
+        */
         void print_summary() const;
+
+        /**
+        * @brief print the map of the game
+        *
+        */
         void print_map() const;
+
+        /**
+         * @brief prints a error message and exits the program
+         * 
+         * @param error_message the error message 
+         */
         void error(const std::string& error_message) const;
 
         // Attributes

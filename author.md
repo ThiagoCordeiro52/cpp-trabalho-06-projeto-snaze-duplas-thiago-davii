@@ -16,12 +16,13 @@ Preencha os dados abaixo para identificar a autoria do trabalho.
 
 - [ ] Simulador apenas sugere direções randômicas para cobra (10 pontos)
 OU
-- [ ] Simulador direciona a cobra corretamente para a comida (50 pontos)
+- [X] Simulador direciona a cobra corretamente para a comida (50 pontos)
 
-- [ ] Apresentar e manipula corretamente os estados da simulação (30 pontos)
+- [X] Apresentar e manipula corretamente os estados da simulação (30 pontos)
 
-- [ ] **Extra**: simulação gera o menor caminho
+- [X] **Extra**: simulação gera o menor caminho
 - [ ] **Extra**: 
+
 
 # Compilando e executando
 
@@ -33,7 +34,7 @@ Para compilar e executar o programa manualmente basta digitar os seguintes coman
 $ git clone git@github.com:selan-active-classes/trabalho-06-projeto-snaze-duplas-thiago-davii.git (faz o clone do repositório em algum diretório do seu pc)
 $ cd trabalho-06-projeto-snaze-duplas-thiago-davii/ (vai até a pasta do repositório clonado)
 $ mkdir build (caso não tenha uma pasta para os executáveis, você deve criá-la com esse comando)
-$ g++ -Wall -std=c++17 -g source/src/main.cpp source/src/snake.cpp source/src/snaze_manager.cpp -I source/include -o build/snaze(compilar)
+$ g++ -Wall -std=c++17 -g source/src/main.cpp source/src/level.cpp source/src/snaze_manager.cpp -I source/include -o build/snaze(compilar)
 $ ./build/snaze [<options>] <input_level_file> (executar)
 ```
 
