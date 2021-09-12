@@ -1,11 +1,14 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-// #include <iostream>
 #include <vector>
 using std::vector;
 #include <deque>
 using std::deque;
+#include <set>
+using std::set;
+#include <unordered_map>
+using std::unordered_multimap;
 #include <utility>
 using std::pair;
 #include <optional>
@@ -46,29 +49,21 @@ class Snake {
 
         using Instruction = std::pair<Command, Direction>;
 
-        // Snake() : m_body{}, m_backup{}, m_lives{0} {/* empty */}
-        // Snake(Position start, unsigned int lives) : m_body{start}, m_backup{}, m_lives{lives} {/* empty */}
-
-        Snake() : m_body{}, m_lives{0} {/* empty */}
-        Snake(Position start, unsigned int lives) : m_body{start}, m_lives{lives} {/* empty */}
+        Snake() : m_body{} {/* empty */}
+        Snake(Position start) : m_body{start} {/* empty */}
 
         Position next_move(Direction facing) const;
         void move(Direction facing);
         void enlarge(Direction facing);
-        // void backup();
-        // void reset_backup();
         void reset(Position& pos);
         const Position& head() const;
         const Position& tail() const;
-        bool dead() const;
         std::array <Position, 4>  possible_moves() const;
         Path::iterator begin();
         Path::iterator end();
 
     private:
         Path m_body;
-        // std::optional<Path> m_backup;
-        unsigned int m_lives;
 };
 
 struct Level {
@@ -90,6 +85,11 @@ struct Level {
     Map level_map;
     Position initial_pos;
     unsigned int quant_food;
+};
+
+/// Functor that generates a hash number for a given position.
+struct KeyHash {
+    std::size_t operator()( const Position& pos ) const;
 };
 
 #endif

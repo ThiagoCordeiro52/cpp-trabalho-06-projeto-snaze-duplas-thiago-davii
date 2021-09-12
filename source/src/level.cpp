@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "level.h"
 
 Position Snake::next_move(Direction facing) const {
@@ -33,17 +31,6 @@ void Snake::move(Direction facing) {
 void Snake::enlarge(Direction facing) {
     m_body.push_front(next_move(facing));
 }
-// 
-// void Snake::backup() {
-//     m_backup.emplace(m_body);
-// }
-// 
-// void Snake::reset_backup() {
-//     if (not m_backup.has_value())
-//         throw std::runtime_error("the body of the snake was not backed up");
-//     m_body = m_backup.value();
-//     m_backup.reset();
-// }
 
 const Position& Snake::head() const {
     return m_body.front();
@@ -55,12 +42,6 @@ const Position& Snake::tail() const {
 
 void Snake::reset(Position& pos) {
     m_body = {pos};
-    // m_backup.reset();
-    m_lives -= 1;
-}
-
-bool Snake::dead() const {
-    return m_lives <= 0;
 }
 
 Path::iterator Snake::begin() {
@@ -80,6 +61,8 @@ std::array <Position, 4> Snake::possible_moves() const {
         std::make_pair(head.first - 1, head.second),
     };
 }
+
+
 
 std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
     switch (type) {
@@ -127,17 +110,18 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
         } break;
         case BACKTRACKING: {
             // Create a deque contains the possibles paths to food [X]
-            std::deque<std::pair <std::deque<Snake::Instruction>, Snake>> paths;
+            std::deque paths {std::make_pair(std::deque<Snake::Instruction>{}, snake)};
             auto map_copy = level_map;
 
             // Remove current snake from map to avoid problems
             for (const auto& pos : snake)
                 map_copy[pos.first][pos.second] = PATH;
 
-            paths.emplace_back(std::deque<Snake::Instruction>{}, snake);
+            std::unordered_multimap<Position, Path, KeyHash> used_pos {17};
 
             // Iterate over the deque of paths [X]
             while (not paths.empty()) {
+                // std::set<Position> used_pos;
                 auto& curr_path {paths.front()};
 
                 // Add current snake to map
@@ -149,13 +133,22 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
                     auto pos {curr_path.second.next_move(direction)};
                     const auto& tile {map_copy[pos.first][pos.second]};
 
+                    auto range_ {used_pos.equal_range(pos)};
+                    std::set values (range_.first, range_.second);
+                    auto last {curr_path.second.begin() + 2};
+                    if (std::distance(curr_path.second.begin(), curr_path.second.end()) < 2)
+                        last = curr_path.second.end();
+                    auto value {std::make_pair(pos, std::deque(curr_path.second.begin(), last))};
                     // If the position is the food, return the current path [X]
                     if (tile == FOOD) {
                         curr_path.first.emplace_back(Snake::ENLARGE, direction);
                         return curr_path.first;
                     }
                     // If the position is a path, create a copy of the snake and move it there [X]
-                    else if (tile == PATH) {
+                    // else if (tile == PATH and used_pos.find(pos) == used_pos.end()) {
+                    else if (tile == PATH and values.find(value) == values.end()) {
+                        // used_pos.insert(pos);
+                        used_pos.insert(value);
                         auto new_path = curr_path;
                         new_path.first.emplace_back(Snake::MOVE, direction);
                         new_path.second.move(direction);
@@ -163,7 +156,6 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
                         // Add new path no the end of the paths vector[X]
                         paths.push_back(new_path);
                     }
-
                 }
 
                 // Remove current snake from map, to avoid problems with other snakes
@@ -179,5 +171,9 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
         } break;
     }
     throw std::runtime_error("unexpect error");
+}
+
+std::size_t KeyHash::operator()( const Position& pos ) const {
+    return std::hash<int>()(pos.first xor pos.second);
 }
 

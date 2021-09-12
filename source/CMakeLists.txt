@@ -8,4 +8,4 @@ add_executable(snaze src/main.cpp
                      src/snaze_manager.cpp
                      src/level.cpp)
 
-set(CMAKE_CXX_FLAGS "-g")
+# set(CMAKE_CXX_FLAGS "-O3")
