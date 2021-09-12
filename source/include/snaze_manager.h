@@ -60,6 +60,7 @@ class SnazeManager {
         number_type m_quant_food {10};
         number_type m_total_lives {5};
         number_type m_remaing_lives;
+        number_type m_score {0};
         std::string m_filename;
         PlayerType m_player_type {BACKTRACKING};
         std::deque<Snake::Instruction> m_instructions;

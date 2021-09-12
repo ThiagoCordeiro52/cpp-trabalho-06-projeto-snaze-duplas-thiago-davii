@@ -23,12 +23,14 @@ Position Snake::next_move(Direction facing) const {
 }
 
 void Snake::move(Direction facing) {
+    m_last_direction = facing;
     m_body.pop_back();
 
     m_body.push_front(next_move(facing));
 }
 
 void Snake::enlarge(Direction facing) {
+    m_last_direction = facing;
     m_body.push_front(next_move(facing));
 }
 
@@ -39,6 +41,10 @@ const Position& Snake::head() const {
 const Position& Snake::tail() const {
     return m_body.back();
 }
+
+const Snake::Direction& Snake::last_direction() const {
+    return m_last_direction;
+};
 
 void Snake::reset(Position& pos) {
     m_body = {pos};
@@ -93,7 +99,7 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
                     }
                     else if (tile == PATH) {
                         found_path = true;
-                        tile = SNAKE;
+                        tile = SNAKE_HEAD;
                         instructions.emplace_back(Snake::MOVE, direction);
                         map_copy[snake_copy.tail().first][snake_copy.tail().second] = PATH;
                         snake_copy.move(direction);
@@ -126,7 +132,7 @@ std::deque<Snake::Instruction> Level::find_path(PlayerType type) {
 
                 // Add current snake to map
                 for (const auto& pos: curr_path.second)
-                    map_copy[pos.first][pos.second] = SNAKE;
+                    map_copy[pos.first][pos.second] = SNAKE_HEAD;
 
                 // Check all the positions next to the snake [X]
                 for (const auto& direction: Snake::directions) {

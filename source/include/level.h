@@ -58,12 +58,14 @@ class Snake {
         void reset(Position& pos);
         const Position& head() const;
         const Position& tail() const;
+        const Direction& last_direction() const;
         std::array <Position, 4>  possible_moves() const;
         Path::iterator begin();
         Path::iterator end();
 
     private:
         Path m_body;
+        Direction m_last_direction {Direction::NORTH};
 };
 
 struct Level {
@@ -71,11 +73,11 @@ struct Level {
         PATH,
         WALL,
         INVISIBLE_WALL,
-        // SNAKE_HEAD,
-        // SNAKE_TAIL,
-        SNAKE,
+        SNAKE_HEAD,
+        SNAKE_TAIL,
+        // SNAKE,
         FOOD,
-        // CRASH,
+        CRASH,
     };
 
     using Map = std::vector<std::vector<Tile>>;

@@ -160,7 +160,7 @@ void SnazeManager::process() {
                                 auto pos {std::make_pair(i, j)};
                                 level.snake = Snake {pos};
                                 level.initial_pos = pos;
-                                tile = Level::Tile::SNAKE;
+                                tile = Level::Tile::SNAKE_HEAD;
                             } break;
                             case '.':
                                 tile = Level::Tile::INVISIBLE_WALL;
@@ -215,7 +215,7 @@ void SnazeManager::process() {
             }
             m_remaing_lives -= 1;
             curr_level.snake.reset(curr_level.initial_pos);
-            curr_level.level_map[curr_level.initial_pos.first][curr_level.initial_pos.second] = Level::SNAKE;
+            curr_level.level_map[curr_level.initial_pos.first][curr_level.initial_pos.second] = Level::SNAKE_HEAD;
             curr_level.quant_food = m_quant_food;
         } break;
 
@@ -269,22 +269,28 @@ void SnazeManager::update() {
                     auto& added_tile = curr_level.level_map[added.first][added.second];
 
                     if (added_tile == Level::PATH) {
+                        auto & head {curr_level.snake.head()};
+                        curr_level.level_map[head.first][head.second] = Level::SNAKE_TAIL;
                         curr_level.snake.move(next_instruction.second);
-                        added_tile = Level::SNAKE;
+                        added_tile = Level::SNAKE_HEAD;
                         curr_level.level_map[removed.first][removed.second] = Level::PATH;
                     }
                     else {
-                        // curr_level.level_map[removed.first][removed.second] = Level::CRASH;
+                        // auto next_pos = curr_level.snake.next_move(curr_level.snake.last_direction());
+                        // curr_level.level_map[next_pos.first][next_pos.second] = Level::CRASH; 
                         m_state = CRASH;
                     }
                 } break;
                 case Snake::ENLARGE: {
+                    auto & head {curr_level.snake.head()};
+                    curr_level.level_map[head.first][head.second] = Level::SNAKE_TAIL;
                     curr_level.snake.enlarge(next_instruction.second);
 
                     auto added {curr_level.snake.head()};
-                    curr_level.level_map[added.first][added.second] = Level::SNAKE;
+                    curr_level.level_map[added.first][added.second] = Level::SNAKE_HEAD;
 
                     curr_level.quant_food--;
+                    m_score += (m_quant_food - curr_level.quant_food) * 13 / m_quant_food ;
 
                     if (curr_level.quant_food > 0)
                         m_state = CREATING_LEVEL;
@@ -302,12 +308,12 @@ void SnazeManager::update() {
                 m_state = WIN_GAME;
             else
                 m_state = CREATING_LEVEL;
-
             break;
 
 
         case CRASH: {
             auto& curr_level {m_levels.front()};
+            m_score = 0;
             if (m_remaing_lives <= 0)
                 m_state = LOSE_GAME;
             else
@@ -430,6 +436,8 @@ void SnazeManager::print_map() const {
     for (auto i {m_remaing_lives}; i > 0; i--)
         std::cout << u8"♥";
 
+    std::cout << " | Score: " << m_score;
+
     std::cout << " | Food eaten: " << (m_quant_food - level.quant_food) << " of " << m_quant_food << "\n";
     std::cout << "--------------------------------------------------------\n";
 
@@ -440,27 +448,57 @@ void SnazeManager::print_map() const {
                 case Level::PATH:
                     std::cout << " ";
                     break;
+
                 case Level::WALL:
                     std::cout << u8"█";
                     break;
+
                 case Level::INVISIBLE_WALL:
                     std::cout << " ";
                     break;
-                // case Level::SNAKE_HEAD:
-                //     std::cout << '>';
-                //     break;
-                case Level::SNAKE:
+
+                case Level::SNAKE_HEAD:
+                    switch (level.snake.last_direction())
+                    {
+                        case Snake::NORTH: 
+                            std::cout << "V";
+                            break;
+
+                        case Snake::SOUTH:
+                            std::cout << "Λ";
+                            break;
+
+                        case Snake::EAST:
+                            std::cout << "<";
+                            break;
+
+                        case Snake::WEST:
+                            std::cout << ">";
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                    break;
+
+                case Level::SNAKE_TAIL:
                     std::cout << u8"♦";
                     break;
+    
                 case Level::FOOD:
                     std::cout << u8"@";
                     break;
-            //     case Level::CRASH:
-            //         std::cout << 'X';
-            //         break;
+
+                // case Level::CRASH:
+                //     std::cout << 'X';
+                //     break;
             }
         }
         std::cout << '\n';
     }
     std::cout << "--------------------------------------------------------\n";
 }
+
+
+
+
