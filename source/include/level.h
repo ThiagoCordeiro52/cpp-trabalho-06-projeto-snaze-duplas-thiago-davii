@@ -22,6 +22,9 @@ using std::shuffle;
 #include <random>
 using std::default_random_engine;
 using std::uniform_int_distribution;
+#include <chrono>
+using std::chrono::system_clock;
+using std::chrono::milliseconds;
 
 using Position = std::pair<int, int>;
 using Path = std::deque<Position>;
@@ -145,12 +148,14 @@ struct Level {
     };
 
     using Map = std::vector<std::vector<Tile>>;
-    std::deque<Snake::Instruction> find_path(PlayerType type);
+    // std::deque<Snake::Instruction> find_path(PlayerType type);
+    Snake::Instruction next_instruction(PlayerType type);
 
     Snake snake;
     Map level_map;
     Position initial_pos;
     unsigned int quant_food;
+    std::deque<Snake::Instruction> instructions;
 };
 
 /// Functor that generates a hash number for a given position.

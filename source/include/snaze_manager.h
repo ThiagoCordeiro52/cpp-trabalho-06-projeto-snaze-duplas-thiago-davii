@@ -7,9 +7,6 @@ using std::cout;
 using std::string;
 #include <fstream>
 using std::ifstream;
-#include <chrono>
-using std::chrono::system_clock;
-using std::chrono::milliseconds;
 #include <thread>
 #include <queue>
 using std::queue;
@@ -109,6 +106,7 @@ class SnazeManager {
         number_type m_score {0};
         std::string m_filename;
         PlayerType m_player_type {BACKTRACKING};
-        std::deque<Snake::Instruction> m_instructions;
+        // std::deque<Snake::Instruction> m_instructions;
+        Snake::Instruction m_next_instruction;
 };
 #endif

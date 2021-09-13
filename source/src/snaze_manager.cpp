@@ -199,7 +199,7 @@ void SnazeManager::process() {
 
         case THINKING: {
             auto& level {m_levels.front()};
-            m_instructions = level.find_path(m_player_type);
+            m_next_instruction = level.next_instruction(m_player_type);
         } break;
 
         case MOVING:
@@ -253,38 +253,31 @@ void SnazeManager::update() {
             break;
 
         case MOVING: {
-            if (m_instructions.empty()) {
-                std::cout << "end of instructions\n";
-                m_state = END;
-                break;
-            }
-            auto& next_instruction {m_instructions.front()};
-            m_instructions.pop_front();
             auto& curr_level {m_levels.front()};
 
-            switch (next_instruction.first) {
+            switch (m_next_instruction.first) {
                 case Snake::MOVE: {
-                    auto& removed {curr_level.snake.tail()};
-                    auto added {curr_level.snake.next_move(next_instruction.second)};
+                    const auto& removed {curr_level.snake.tail()};
+                    auto added {curr_level.snake.next_move(m_next_instruction.second)};
                     auto& added_tile = curr_level.level_map[added.first][added.second];
 
                     if (added_tile == Level::PATH) {
-                        auto & head {curr_level.snake.head()};
+                        const auto& head {curr_level.snake.head()};
                         curr_level.level_map[head.first][head.second] = Level::SNAKE_TAIL;
-                        curr_level.snake.move(next_instruction.second);
+                        curr_level.snake.move(m_next_instruction.second);
                         added_tile = Level::SNAKE_HEAD;
                         curr_level.level_map[removed.first][removed.second] = Level::PATH;
+
+                        m_state = THINKING;
                     }
                     else {
-                        // auto next_pos = curr_level.snake.next_move(curr_level.snake.last_direction());
-                        // curr_level.level_map[next_pos.first][next_pos.second] = Level::CRASH; 
                         m_state = CRASH;
                     }
                 } break;
                 case Snake::ENLARGE: {
-                    auto & head {curr_level.snake.head()};
+                    const auto& head {curr_level.snake.head()};
                     curr_level.level_map[head.first][head.second] = Level::SNAKE_TAIL;
-                    curr_level.snake.enlarge(next_instruction.second);
+                    curr_level.snake.enlarge(m_next_instruction.second);
 
                     auto added {curr_level.snake.head()};
                     curr_level.level_map[added.first][added.second] = Level::SNAKE_HEAD;
@@ -294,9 +287,8 @@ void SnazeManager::update() {
 
                     if (curr_level.quant_food > 0)
                         m_state = CREATING_LEVEL;
-                    else {
+                    else
                         m_state = NEW_LEVEL;
-                    }
                 } break;
             }
         } break;
@@ -367,7 +359,6 @@ void SnazeManager::render() const {
             break;
 
         case CRASH:
-            // print_map();
             std::cout << "You crashed...\n";
             std::cout << "\n>>> Press enter to continue...";
             while (getc(stdin) != '\n');
@@ -488,17 +479,9 @@ void SnazeManager::print_map() const {
                 case Level::FOOD:
                     std::cout << u8"@";
                     break;
-
-                // case Level::CRASH:
-                //     std::cout << 'X';
-                //     break;
             }
         }
         std::cout << '\n';
     }
     std::cout << "--------------------------------------------------------\n";
 }
-
-
-
-
