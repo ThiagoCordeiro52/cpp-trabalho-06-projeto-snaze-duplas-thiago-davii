@@ -10,7 +10,9 @@ std::string to_lowercase(const std::string& str) {
 }
 
 SnazeManager::SnazeManager(int argc, char *argv[]) {
+    // verify if the file name was set
     bool filename_set {false};
+
     for (int i {1}; i < argc; i++) {
         std::string arg {to_lowercase(argv[i])};
         if (arg == "-h" or arg == "--help") {
@@ -88,15 +90,12 @@ SnazeManager::SnazeManager(int argc, char *argv[]) {
     if (!filename_set)
         error("the path to the input file must be passed as argument");
 
-    m_remaing_lives = m_total_lives;
+    m_remaining_lives = m_total_lives;
 }
 
 void SnazeManager::process() {
     switch (m_state) {
         case START:
-            break;
-
-        case WELCOME:
             break;
 
         case READING: {
@@ -139,11 +138,13 @@ void SnazeManager::process() {
 
                 Level level;
                 level.level_map.reserve(rows + 2);
+                // Fill the first line with invisible wall to avoid having to check map limits
                 level.level_map.emplace_back(columns + 2, Level::INVISIBLE_WALL);
                 for (int i = 1; i <= rows; i++) {
                     std::string line_str;
                     getline(file >> std::ws, line_str);
 
+                    // Fill the first column with invisible wall to avoid having to check map limits
                     std::vector<Level::Tile> line {Level::INVISIBLE_WALL};
                     line.reserve(columns + 2);
 
@@ -182,17 +183,20 @@ void SnazeManager::process() {
             }
          } break;
 
+        case WELCOME:
+            break;
+
         case CREATING_LEVEL: {
+            // get the current level 
             auto& level {m_levels.front()};
             std::default_random_engine generator;
+            // sets the current time as the seed for generator 
             generator.seed(system_clock::now().time_since_epoch().count());
-
-            using rand_in_range = std::uniform_int_distribution<int>;
 
             int row, column;
             do {
-                row = rand_in_range(1, level.level_map.size() - 2)(generator);
-                column = rand_in_range(1, level.level_map[0].size() - 2)(generator);
+                row = std::uniform_int_distribution<int>(1, level.level_map.size() - 2)(generator);
+                column = std::uniform_int_distribution<int>(1, level.level_map[0].size() - 2)(generator);
             } while (level.level_map[row][column] != Level::PATH);
             level.level_map[row][column] = Level::FOOD;
         } break;
@@ -213,7 +217,7 @@ void SnazeManager::process() {
             for (const auto& pos: curr_level.snake) {
                 curr_level.level_map[pos.first][pos.second] = Level::PATH;
             }
-            m_remaing_lives -= 1;
+            m_remaining_lives -= 1;
             curr_level.snake.reset(curr_level.initial_pos);
             curr_level.level_map[curr_level.initial_pos.first][curr_level.initial_pos.second] = Level::SNAKE_HEAD;
             curr_level.quant_food = m_quant_food;
@@ -306,7 +310,7 @@ void SnazeManager::update() {
         case CRASH: {
             auto& curr_level {m_levels.front()};
             m_score = 0;
-            if (m_remaing_lives <= 0)
+            if (m_remaining_lives <= 0)
                 m_state = LOSE_GAME;
             else
                 m_state = THINKING;
@@ -424,7 +428,7 @@ void SnazeManager::print_map() const {
 
     std::cout << "Lives: ";
 
-    for (auto i {m_remaing_lives}; i > 0; i--)
+    for (auto i {m_remaining_lives}; i > 0; i--)
         std::cout << u8"♥";
 
     std::cout << " | Score: " << m_score;

@@ -73,6 +73,7 @@ Snake::Instruction Level::next_instruction(PlayerType type) {
     switch (type) {
         case RANDOM: {
             std::default_random_engine generator;
+            // sets the current time as the seed for generator 
             generator.seed(system_clock::now().time_since_epoch().count());
 
             // Create a vector of directions in random order
@@ -96,6 +97,7 @@ Snake::Instruction Level::next_instruction(PlayerType type) {
             return std::make_pair(Snake::MOVE, directions[0]);
         } break;
         case BACKTRACKING: {
+            // if there is still instructions stored, return the first one 
             if (not instructions.empty()) {
                 const auto& next {instructions.front()};
                 instructions.pop_front();

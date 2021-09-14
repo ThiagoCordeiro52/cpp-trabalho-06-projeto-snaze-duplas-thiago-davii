@@ -148,7 +148,13 @@ struct Level {
     };
 
     using Map = std::vector<std::vector<Tile>>;
-    // std::deque<Snake::Instruction> find_path(PlayerType type);
+    /**
+    * @brief Calculates the next move of snake using a Player of type type 
+    *
+    * @param type type of player
+    *
+    * @return the next instruction the snake must follow
+    */
     Snake::Instruction next_instruction(PlayerType type);
 
     Snake snake;
