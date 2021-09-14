@@ -106,7 +106,6 @@ class SnazeManager {
         number_type m_score {0};
         std::string m_filename;
         PlayerType m_player_type {BACKTRACKING};
-        // std::deque<Snake::Instruction> m_instructions;
         Snake::Instruction m_next_instruction;
 };
 #endif

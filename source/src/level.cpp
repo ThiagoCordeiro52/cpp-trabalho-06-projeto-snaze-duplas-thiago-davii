@@ -110,31 +110,27 @@ Snake::Instruction Level::next_instruction(PlayerType type) {
             auto map_copy = level_map;
 
             // Remove snake from map to avoid problems
-            for (const auto& pos : snake)
+            for (const auto& pos: snake)
                 map_copy[pos.first][pos.second] = PATH;
 
-            std::unordered_multimap<Position, Path, KeyHash> used_pos {17};
+            // Stores pairs of positions representing where the head of the snake was and were she moved to
+            std::unordered_multiset<std::pair<Position, Position>, KeyHash> used_pos;
 
             // Iterate over the deque of paths [X]
             while (not paths.empty()) {
-                // std::set<Position> used_pos;
                 auto& curr_path {paths.front()};
 
                 // Add current snake to map
                 for (const auto& pos: curr_path.second)
-                    map_copy[pos.first][pos.second] = SNAKE_HEAD;
+                    map_copy[pos.first][pos.second] = SNAKE_TAIL;
 
                 // Check all the positions next to the snake [X]
                 for (const auto& direction: Snake::directions) {
                     auto pos {curr_path.second.next_move(direction)};
                     const auto& tile {map_copy[pos.first][pos.second]};
 
-                    auto range_ {used_pos.equal_range(pos)};
-                    std::set values (range_.first, range_.second);
-                    auto last {curr_path.second.begin() + 2};
-                    if (std::distance(curr_path.second.begin(), curr_path.second.end()) < 2)
-                        last = curr_path.second.end();
-                    auto value {std::make_pair(pos, std::deque(curr_path.second.begin(), last))};
+                    std::pair<Position, Position> value {curr_path.second.head(), pos};
+
                     // If the position is the food, return the current path [X]
                     if (tile == FOOD) {
                         curr_path.first.emplace_back(Snake::ENLARGE, direction);
@@ -142,10 +138,13 @@ Snake::Instruction Level::next_instruction(PlayerType type) {
                         return next_instruction(type);
                     }
                     // If the position is a path, create a copy of the snake and move it there [X]
-                    else if (tile == PATH and values.find(value) == values.end()) {
+                    // Also check if this moviment happend before and does not repeat it if so
+                    else if (tile == PATH and used_pos.find(value) == used_pos.end()) {
                         used_pos.insert(value);
                         auto new_path = curr_path;
+                        // Add the instruction to move in this direction
                         new_path.first.emplace_back(Snake::MOVE, direction);
+                        // Move the snake
                         new_path.second.move(direction);
 
                         // Add new path no the end of the paths vector[X]
@@ -168,7 +167,10 @@ Snake::Instruction Level::next_instruction(PlayerType type) {
     throw std::runtime_error("unexpect error");
 }
 
-std::size_t KeyHash::operator()( const Position& pos ) const {
-    return std::hash<int>()(pos.first xor pos.second);
+std::size_t KeyHash::operator()( const std::pair<Position, Position>& positions ) const {
+    return std::hash<int>()(positions.first.first
+                            xor positions.first.second
+                            xor positions.second.first
+                            xor positions.second.second);
 }
 

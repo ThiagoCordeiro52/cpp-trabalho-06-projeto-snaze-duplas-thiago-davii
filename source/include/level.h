@@ -7,8 +7,8 @@ using std::vector;
 using std::deque;
 #include <set>
 using std::set;
-#include <unordered_map>
-using std::unordered_multimap;
+#include <unordered_set>
+using std::unordered_multiset;
 #include <utility>
 using std::pair;
 #include <optional>
@@ -25,6 +25,7 @@ using std::uniform_int_distribution;
 #include <chrono>
 using std::chrono::system_clock;
 using std::chrono::milliseconds;
+#include <iostream>
 
 using Position = std::pair<int, int>;
 using Path = std::deque<Position>;
@@ -166,7 +167,7 @@ struct Level {
 
 /// Functor that generates a hash number for a given position.
 struct KeyHash {
-    std::size_t operator()( const Position& pos ) const;
+    std::size_t operator()( const std::pair<Position, Position>& pos ) const;
 };
 
 #endif
