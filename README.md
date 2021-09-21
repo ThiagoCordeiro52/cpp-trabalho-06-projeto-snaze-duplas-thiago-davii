@@ -3,7 +3,7 @@
 # Apresentação
 
 Nesse trabalho você terá a oportunidade de implementar uma simulação na qual seu programa deve guiar uma cobra dentro de um labirinto até um pedaço de comida que surge em uma posição aleatória.
-A descrição completa do trabalho se encontra [**aqui**](docs/snake_programming_project.pfd).
+A descrição completa do trabalho se encontra [**aqui**](https://github.com/ThiagoOliveiraCordeiro/cpp-trabalho-06-projeto-snaze-duplas-thiago-davii/blob/master/docs/snake_programming_project.pdf).
 
 
 Além da implementação do trabalho você precisa fornecer algumas informações no arquivo [author.md](author.md), indicando a autoria do trabalho e quais itens da tarefa foram realizados com sucesso. 
