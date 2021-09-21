@@ -129,7 +129,7 @@ Snake::Instruction Level::next_instruction(PlayerType type) {
                     auto pos {curr_path.second.next_move(direction)};
                     const auto& tile {map_copy[pos.first][pos.second]};
 
-                    std::pair<Position, Position> value {curr_path.second.head(), pos};
+                    std::pair value {curr_path.second.head(), pos};
 
                     // If the position is the food, return the current path [X]
                     if (tile == FOOD) {
